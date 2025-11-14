@@ -59,11 +59,12 @@ class _OrderScreenState extends State<OrderScreen> {
               'Footlong',
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
                   child: ElevatedButton(
-                    onPressed: _increaseQuantity,
+                    onPressed: _quantity < widget.maxQuantity ? _increaseQuantity : null,
+                    
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
@@ -73,7 +74,7 @@ class _OrderScreenState extends State<OrderScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _decreaseQuantity,
+                  onPressed: _quantity > 0 ? _decreaseQuantity : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.black,
