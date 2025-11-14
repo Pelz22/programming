@@ -33,16 +33,16 @@ class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
 
   void _increaseQuantity() {
-  if (_quantity < widget.maxQuantity) {
-    setState(() => _quantity++);
+    if (_quantity < widget.maxQuantity) {
+      setState(() => _quantity++);
+    }
   }
-}
 
-void _decreaseQuantity() {
-  if (_quantity > 0) {
-    setState(() => _quantity--);
+  void _decreaseQuantity() {
+    if (_quantity > 0) {
+      setState(() => _quantity--);
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +62,14 @@ void _decreaseQuantity() {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => print('Add button pressed!'),
+                  onPressed: _increaseQuantity,
                   child: const Text('Add'),
                 ),
                 ElevatedButton(
-                  onPressed: () => print('Remove button pressed!'),
+                  onPressed: _decreaseQuantity,
                   child: const Text('Remove'),
                 ),
+                
               ],
             ),
           ],
