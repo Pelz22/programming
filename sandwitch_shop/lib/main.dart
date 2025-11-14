@@ -31,6 +31,7 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
+  String _selectedType = 'Footlong';
 
   void _increaseQuantity() {
     if (_quantity < widget.maxQuantity) {
@@ -54,9 +55,23 @@ class _OrderScreenState extends State<OrderScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            DropdownButton<String>(
+              value: _selectedType,
+              items: <String>['Footlong', 'Six-inch']
+                  .map((type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(type),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedType = value!;
+                });
+              },
+            ),
             OrderItemDisplay(
               _quantity,
-              'Footlong',
+              _selectedType, // Use selected type
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
