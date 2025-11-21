@@ -10,6 +10,31 @@ void main() {
     });
   });
 
+
+testWidgets('toggles between six-inch and footlong with Switch', (WidgetTester tester) async {
+  await tester.pumpWidget(const App());
+
+  // Initially, should display 'footlong'
+  expect(find.textContaining('footlong sandwich'), findsOneWidget);
+
+  // Find the Switch and toggle it
+  final switchFinder = find.byType(Switch);
+  expect(switchFinder, findsOneWidget);
+
+  await tester.tap(switchFinder);
+  await tester.pumpAndSettle();
+
+  // After toggling, should display 'six-inch'
+  expect(find.textContaining('six-inch sandwich'), findsOneWidget);
+
+  // Toggle back to footlong
+  await tester.tap(switchFinder);
+  await tester.pumpAndSettle();
+
+  expect(find.textContaining('footlong sandwich'), findsOneWidget);
+});
+
+
   group('OrderScreen - Quantity', () {
     testWidgets('shows initial quantity and title',
         (WidgetTester tester) async {
