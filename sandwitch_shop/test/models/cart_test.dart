@@ -5,14 +5,20 @@ import 'package:sandwich_shop/models/sandwich.dart';
 void main() {
   group('Cart', () {
     final sandwich1 = Sandwich(
+      id: SandwichType.veggieDelight.name,
       type: SandwichType.veggieDelight,
       isFootlong: true,
       breadType: BreadType.white,
+      description: '',
+      available: true,
     );
     final sandwich2 = Sandwich(
+      id: SandwichType.chickenTeriyaki.name,
       type: SandwichType.chickenTeriyaki,
       isFootlong: false,
       breadType: BreadType.wheat,
+      description: '',
+      available: true,
     );
 
     test('addItem adds items to cart', () {

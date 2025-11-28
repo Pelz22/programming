@@ -69,6 +69,8 @@ class Sandwich {
     } else {
       sizeString = 'six_inch';
     }
-    return 'assets/images/${typeString}_$sizeString.png';
+    // The repo stores scalable vector icons as SVGs in assets/images.
+    // Return the .svg path so the UI can render with flutter_svg.
+    return 'assets/images/${typeString}_$sizeString.svg';
   }
 }

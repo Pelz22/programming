@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/models/cart.dart';
@@ -57,23 +58,24 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _addToCart() {
+  // Added id, description, and available fields to match Sandwich model requirements
+  // id uses the sandwich type name, description is left blank, available is set to true
     if (_quantity > 0) {
+      // FIX: Add missing fields for Sandwich constructor (id, description, available)
       final Sandwich sandwich = Sandwich(
+        id: _selectedSandwichType.name, // Use type name as id for now
         type: _selectedSandwichType,
         isFootlong: _isFootlong,
         breadType: _selectedBreadType,
+        description: '', // Placeholder, update if you have descriptions
+        available: true, // Assume available for manual creation
       );
 
       setState(() {
-        _cart.add(sandwich, quantity: _quantity);
+        _cart.addItem(sandwich, quantity: _quantity); // FIX: Use addItem method
       });
 
-      String sizeText;
-      if (_isFootlong) {
-        sizeText = 'footlong';
-      } else {
-        sizeText = 'six-inch';
-      }
+      String sizeText = _isFootlong ? 'footlong' : 'six-inch';
       String confirmationMessage =
           'Added $_quantity $sizeText ${sandwich.name} sandwich(es) on ${_selectedBreadType.name} bread to cart';
 
@@ -89,10 +91,18 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   List<DropdownMenuEntry<SandwichType>> _buildSandwichTypeEntries() {
+  // Added id, description, and available fields to match Sandwich model requirements
     List<DropdownMenuEntry<SandwichType>> entries = [];
     for (SandwichType type in SandwichType.values) {
-      Sandwich sandwich =
-          Sandwich(type: type, isFootlong: true, breadType: BreadType.white);
+      // FIX: Add missing fields for Sandwich constructor
+      Sandwich sandwich = Sandwich(
+        id: type.name,
+        type: type,
+        isFootlong: true,
+        breadType: BreadType.white,
+        description: '',
+        available: true,
+      );
       DropdownMenuEntry<SandwichType> entry = DropdownMenuEntry<SandwichType>(
         value: type,
         label: sandwich.name,
@@ -115,11 +125,16 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   String _getCurrentImagePath() {
+    // Build a temporary Sandwich just to compute the asset path.
     final Sandwich sandwich = Sandwich(
+      id: _selectedSandwichType.name,
       type: _selectedSandwichType,
       isFootlong: _isFootlong,
       breadType: _selectedBreadType,
+      description: '',
+      available: true,
     );
+    // Sandwich.image now returns the .svg path.
     return sandwich.image;
   }
 
@@ -168,6 +183,8 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Print the image path for debugging
+    print(_getCurrentImagePath());
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -182,17 +199,16 @@ class _OrderScreenState extends State<OrderScreen> {
             children: [
               SizedBox(
                 height: 300,
-                child: Image.asset(
+                child: SvgPicture.asset(
                   _getCurrentImagePath(),
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Text(
-                        'Image not found',
-                        style: normalText,
-                      ),
-                    );
-                  },
+                  // placeholderBuilder shows while the SVG is being loaded.
+                  placeholderBuilder: (context) => const Center(
+                    child: Text(
+                      'Loading image...',
+                      style: normalText,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -234,7 +250,8 @@ class _OrderScreenState extends State<OrderScreen> {
                     onPressed: _getDecreaseCallback(),
                     icon: const Icon(Icons.remove),
                   ),
-                  Text('$_quantity', style: heading2),
+                  // Changed from heading2 to normalText to avoid undefined style error
+                  Text('$_quantity', style: normalText),
                   IconButton(
                     onPressed: _increaseQuantity,
                     icon: const Icon(Icons.add),
@@ -256,6 +273,11 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
+// Moved StyledButton to the end of the file as a top-level class
+// This resolves Dart errors about nested classes and undefined fields.
+// StyledButton is now accessible anywhere in the file.
+}
+
 class StyledButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData icon;
@@ -263,12 +285,12 @@ class StyledButton extends StatelessWidget {
   final Color backgroundColor;
 
   const StyledButton({
-    super.key,
+    Key? key,
     required this.onPressed,
     required this.icon,
     required this.label,
     required this.backgroundColor,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
