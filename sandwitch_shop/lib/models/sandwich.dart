@@ -1,3 +1,10 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+Future<List<Map<String, dynamic>>> loadSandwichData() async {
+  final String jsonString = await rootBundle.loadString('assets/sandwiches.json');
+  final Map<String, dynamic> jsonData = json.decode(jsonString);
+  return List<Map<String, dynamic>>.from(jsonData['sandwiches']);
+}
 enum BreadType { white, wheat, wholemeal }
 
 enum SandwichType {
@@ -8,15 +15,38 @@ enum SandwichType {
 }
 
 class Sandwich {
+  final String id;
   final SandwichType type;
   final bool isFootlong;
   final BreadType breadType;
+  final String description;
+  final bool available;
 
   Sandwich({
+    required this.id,
     required this.type,
     required this.isFootlong,
     required this.breadType,
+    required this.description,
+    required this.available,
   });
+
+  factory Sandwich.fromJson(Map<String, dynamic> json) {
+    return Sandwich(
+      id: json['id'] as String,
+      type: SandwichType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => SandwichType.veggieDelight,
+      ),
+      isFootlong: json['isFootlong'] as bool? ?? true,
+      breadType: BreadType.values.firstWhere(
+        (e) => e.name == json['breadType'],
+        orElse: () => BreadType.white,
+      ),
+      description: json['description'] as String? ?? '',
+      available: json['available'] as bool? ?? true,
+    );
+  }
 
   String get name {
     switch (type) {
