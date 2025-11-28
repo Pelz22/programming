@@ -63,5 +63,29 @@ group('OrderScreen - Quantity', () {
     expect(find.text('Add to Cart'), findsOneWidget);
     expect(find.byType(StyledButton), findsOneWidget);
   });
+
+  testWidgets('shows SnackBar with UNDO when Add to Cart tapped', (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+
+    // Tap the Add to Cart button
+    final addToCartFinder = find.text('Add to Cart');
+    expect(addToCartFinder, findsOneWidget);
+    await tester.tap(addToCartFinder);
+
+    // Allow SnackBar animation to appear
+    await tester.pumpAndSettle();
+
+    // Confirm the SnackBar content is shown
+    const expectedMessage = 'Added 1 footlong Veggie Delight sandwich(es) on white bread to cart';
+    expect(find.text(expectedMessage), findsOneWidget);
+
+    // The SnackBar should include the UNDO action
+    expect(find.text('UNDO'), findsOneWidget);
+
+    // Tap UNDO and ensure the SnackBar is dismissed
+    await tester.tap(find.text('UNDO'));
+    await tester.pumpAndSettle();
+    expect(find.text(expectedMessage), findsNothing);
+  });
 });
 }

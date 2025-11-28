@@ -7,10 +7,14 @@ import 'package:sandwich_shop/models/cart.dart';
 
 
 
+/// Application entry point. Runs the top-level [App] widget which
+/// bootstraps the Material application and loads the `OrderScreen`.
 void main() {
   runApp(const App());
 }
 
+/// Root widget for the application. Wraps the [OrderScreen] with
+/// [MaterialApp] so Material theming and navigation are available.
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -23,6 +27,10 @@ class App extends StatelessWidget {
   }
 }
 
+/// Screen that allows the user to select sandwich options and add items to a cart.
+///
+/// `maxQuantity` controls the maximum number of sandwiches that can be ordered
+/// through this UI (used by tests and UI constraints).
 class OrderScreen extends StatefulWidget {
   final int maxQuantity;
 
@@ -35,9 +43,13 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  // Simple in-memory cart for the current session/screen.
   final Cart _cart = Cart();
+
+  // Controller for notes input (wired to a TextField if present).
   final TextEditingController _notesController = TextEditingController();
 
+  // UI selection state: sandwich type, size flag, bread type, and quantity.
   SandwichType _selectedSandwichType = SandwichType.veggieDelight;
   bool _isFootlong = true;
   BreadType _selectedBreadType = BreadType.white;
@@ -46,6 +58,9 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   void initState() {
     super.initState();
+    // Listen for changes on the notes controller and rebuild when they occur.
+    // This keeps the UI in sync with the text input if notes are displayed
+    // elsewhere in the widget tree.
     _notesController.addListener(() {
       setState(() {});
     });
@@ -58,28 +73,47 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _addToCart() {
-  // Added id, description, and available fields to match Sandwich model requirements
-  // id uses the sandwich type name, description is left blank, available is set to true
     if (_quantity > 0) {
-      // FIX: Add missing fields for Sandwich constructor (id, description, available)
+      // Build a Sandwich model for the current UI selection. The model
+      // requires `id`, `description`, and `available`, so we provide
+      // simple defaults here (id uses the enum name).
       final Sandwich sandwich = Sandwich(
-        id: _selectedSandwichType.name, // Use type name as id for now
+        id: _selectedSandwichType.name,
         type: _selectedSandwichType,
         isFootlong: _isFootlong,
         breadType: _selectedBreadType,
-        description: '', // Placeholder, update if you have descriptions
-        available: true, // Assume available for manual creation
+        description: '',
+        available: true,
       );
 
+      // Add the selected sandwich to the cart and update UI.
       setState(() {
-        _cart.addItem(sandwich, quantity: _quantity); // FIX: Use addItem method
+        _cart.addItem(sandwich, quantity: _quantity);
       });
 
+      // Developer-facing confirmation printed to console.
       String sizeText = _isFootlong ? 'footlong' : 'six-inch';
       String confirmationMessage =
           'Added $_quantity $sizeText ${sandwich.name} sandwich(es) on ${_selectedBreadType.name} bread to cart';
-
       debugPrint(confirmationMessage);
+
+      // Show an on-screen SnackBar confirmation with an UNDO action.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(confirmationMessage),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () {
+              // Undo: remove the item that was just added.
+              setState(() {
+                _cart.removeItem(sandwich);
+              });
+            },
+          ),
+        ),
+      );
     }
   }
 
@@ -91,7 +125,9 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   List<DropdownMenuEntry<SandwichType>> _buildSandwichTypeEntries() {
-  // Added id, description, and available fields to match Sandwich model requirements
+    // Build entries for the sandwich type dropdown. We create a
+    // temporary Sandwich only to reuse the `name` getter for a
+    // human-friendly label.
     List<DropdownMenuEntry<SandwichType>> entries = [];
     for (SandwichType type in SandwichType.values) {
       // FIX: Add missing fields for Sandwich constructor
@@ -125,7 +161,10 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   String _getCurrentImagePath() {
-    // Build a temporary Sandwich just to compute the asset path.
+    // Compute the current sandwich image path by constructing a
+    // temporary Sandwich model and returning its `image` value.
+    // The model returns the SVG asset path which is rendered via
+    // flutter_svg in the UI.
     final Sandwich sandwich = Sandwich(
       id: _selectedSandwichType.name,
       type: _selectedSandwichType,
@@ -134,7 +173,6 @@ class _OrderScreenState extends State<OrderScreen> {
       description: '',
       available: true,
     );
-    // Sandwich.image now returns the .svg path.
     return sandwich.image;
   }
 
@@ -183,7 +221,8 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Print the image path for debugging
+    // Print the computed image path for debugging (useful while
+    // developing to verify asset names).
     print(_getCurrentImagePath());
     return Scaffold(
       appBar: AppBar(
@@ -197,12 +236,15 @@ class _OrderScreenState extends State<OrderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Visual area for the sandwich illustration. The app uses SVG
+              // assets (rendered with flutter_svg) so images remain crisp
+              // at different device pixel ratios.
               SizedBox(
                 height: 300,
                 child: SvgPicture.asset(
                   _getCurrentImagePath(),
                   fit: BoxFit.cover,
-                  // placeholderBuilder shows while the SVG is being loaded.
+                  // Show a small placeholder widget while the SVG loads.
                   placeholderBuilder: (context) => const Center(
                     child: Text(
                       'Loading image...',
@@ -273,9 +315,10 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-// Moved StyledButton to the end of the file as a top-level class
-// This resolves Dart errors about nested classes and undefined fields.
-// StyledButton is now accessible anywhere in the file.
+// End of OrderScreen state class.
+//
+// The StyledButton implementation follows as a top-level widget so it can
+// be reused anywhere else in the project.
 }
 
 class StyledButton extends StatelessWidget {
