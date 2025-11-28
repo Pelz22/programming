@@ -230,6 +230,22 @@ class _OrderScreenState extends State<OrderScreen> {
           'Sandwich Counter',
           style: heading1,
         ),
+        // Compact cart summary in the app bar actions. Shows current
+        // item count and formatted total price. Because cart mutations
+        // call setState, these values update automatically.
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('Items: ${_cart.totalItems}', style: normalText),
+                Text('\$${_cart.totalPrice.toStringAsFixed(2)}', style: normalText),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
